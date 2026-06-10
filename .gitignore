@@ -39,6 +39,13 @@ build/
 .env.*
 !.env.example
 
+# ---------- Clinical data----------
+backend/data/
+*.csv
+*.xlsx
+*.xls
+*.parquet
+
 # ---------- Logs ----------
 logs/
 *.log
