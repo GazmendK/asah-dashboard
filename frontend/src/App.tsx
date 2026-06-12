@@ -1,83 +1,207 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   Alert,
-  AppBar,
   Box,
-  Chip,
   CircularProgress,
-  Container,
   CssBaseline,
   Stack,
   ThemeProvider,
-  Toolbar,
   Typography,
 } from '@mui/material'
 
-import { fetchPatients, type Patient } from './api'
+import {
+  fetchPatientSummary,
+  fetchPatients,
+  type Patient,
+  type PatientSummary,
+} from './api'
+import { DEFAULT_PARAMS, VITAL_PARAMS } from './constants'
+import type { Filters } from './types'
 import { theme } from './theme'
+import { AppHeader } from './components/AppHeader'
+import { FilterPanel } from './components/FilterPanel'
+import { StatusBar } from './components/StatusBar'
+import { PatientSummaryPanel } from './components/PatientSummaryPanel'
+import { ChartPlaceholder } from './components/ChartPlaceholder'
+
+const PARAM_LOOKUP = Object.fromEntries(VITAL_PARAMS.map((p) => [p.key, p]))
+
+const INITIAL_FILTERS: Filters = {
+  ageRange: [0, 120],
+  fisher: [],
+  mFisher: [],
+  wfns: [],
+  location: [],
+}
+
+function applyFilters(patients: Patient[], f: Filters): Patient[] {
+  return patients.filter((p) => {
+    if (p.age != null && (p.age < f.ageRange[0] || p.age > f.ageRange[1])) return false
+    if (f.fisher.length && (p.fisher == null || !f.fisher.includes(p.fisher))) return false
+    if (f.mFisher.length && (p.mFisher == null || !f.mFisher.includes(p.mFisher))) return false
+    if (f.wfns.length && (p.wfns == null || !f.wfns.includes(p.wfns))) return false
+    if (f.location.length && (p.aneurysmLocation == null || !f.location.includes(p.aneurysmLocation)))
+      return false
+    return true
+  })
+}
 
 function App() {
   const [patients, setPatients] = useState<Patient[] | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [selected, setSelected] = useState<Patient | null>(null)
+  const [summary, setSummary] = useState<PatientSummary | null>(null)
+  const [summaryLoading, setSummaryLoading] = useState(false)
+  const [filters, setFilters] = useState<Filters>(INITIAL_FILTERS)
+  const [selectedParams, setSelectedParams] = useState<string[]>(DEFAULT_PARAMS)
 
   useEffect(() => {
     fetchPatients()
-      .then(setPatients)
+      .then((list) => {
+        setPatients(list)
+        const ages = list.map((p) => p.age).filter((a): a is number => a != null)
+        if (ages.length) {
+          setFilters((f) => ({ ...f, ageRange: [Math.min(...ages), Math.max(...ages)] }))
+        }
+      })
       .catch((e: unknown) => setError(e instanceof Error ? e.message : String(e)))
   }, [])
 
-  const sample = patients?.[0]
+  useEffect(() => {
+    if (!selected) {
+      setSummary(null)
+      return
+    }
+    let active = true
+    setSummaryLoading(true)
+    fetchPatientSummary(selected.caseId)
+      .then((s) => {
+        if (active) setSummary(s)
+      })
+      .catch((e: unknown) => setError(e instanceof Error ? e.message : String(e)))
+      .finally(() => {
+        if (active) setSummaryLoading(false)
+      })
+    return () => {
+      active = false
+    }
+  }, [selected])
+
+  const ageBounds = useMemo<[number, number]>(() => {
+    const ages = (patients ?? []).map((p) => p.age).filter((a): a is number => a != null)
+    return ages.length ? [Math.min(...ages), Math.max(...ages)] : [0, 120]
+  }, [patients])
+
+  const options = useMemo(() => {
+    const filtered = applyFilters(patients ?? [], filters)
+    if (selected && !filtered.some((p) => p.caseId === selected.caseId)) {
+      return [selected, ...filtered]
+    }
+    return filtered
+  }, [patients, filters, selected])
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <AppBar position="static" color="default" elevation={1}>
-        <Toolbar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            aSAB-Verlaufsdashboard
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Bachelorarbeit · G. Kamberi
-          </Typography>
-        </Toolbar>
-      </AppBar>
+      <AppHeader
+        patients={options}
+        selected={selected}
+        onSelect={setSelected}
+        stayDays={selected?.stayDays ?? null}
+      />
 
-      <Container sx={{ py: 4 }}>
-        {error && (
-          <Alert severity="error">
-            Backend nicht erreichbar ({error}). Läuft die API auf Port 8000?
-          </Alert>
-        )}
+      <Box sx={{ display: 'flex', alignItems: 'stretch' }}>
+        <Box
+          component="aside"
+          sx={{
+            width: 280,
+            flexShrink: 0,
+            p: 2,
+            borderRight: 1,
+            borderColor: 'divider',
+            height: 'calc(100vh - 64px)',
+            overflowY: 'auto',
+          }}
+        >
+          <FilterPanel
+            filters={filters}
+            onFilters={setFilters}
+            ageBounds={ageBounds}
+            selectedParams={selectedParams}
+            onParams={setSelectedParams}
+          />
+        </Box>
 
-        {!patients && !error && (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <CircularProgress size={20} />
-            <Typography>Lade Patienten…</Typography>
-          </Box>
-        )}
-
-        {patients && (
-          <Stack spacing={2}>
-            <Alert severity="success">
-              Backend verbunden — {patients.length} Patienten geladen.
+        <Box
+          component="main"
+          sx={{ flexGrow: 1, p: 2, height: 'calc(100vh - 64px)', overflowY: 'auto' }}
+        >
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
             </Alert>
-            <Typography variant="body2" color="text.secondary">
-              Checkpoint Phase 0 + 1: FastAPI-API, Material UI und der Vega-Stack stehen.
-              Beispiel-Patient aus der echten Datenbasis:
-            </Typography>
-            {sample && (
-              <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
-                <Chip color="primary" label={`Fall ${sample.caseId}`} />
-                <Chip variant="outlined" label={`${sample.age ?? '–'} J. · ${sample.sex ?? '–'}`} />
-                <Chip variant="outlined" label={`${sample.intervention ?? '–'} · ${sample.aneurysmLocation ?? '–'}`} />
-                <Chip variant="outlined" label={`Fisher ${sample.fisher ?? '–'} / mFisher ${sample.mFisher ?? '–'}`} />
-                <Chip variant="outlined" label={`WFNS ${sample.wfns ?? '–'}`} />
-                <Chip variant="outlined" label={`${sample.stayDays ?? '–'} Tage`} />
-              </Stack>
-            )}
-          </Stack>
-        )}
-      </Container>
+          )}
+
+          {!patients && !error && (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <CircularProgress size={20} />
+              <Typography>Lade Patienten…</Typography>
+            </Box>
+          )}
+
+          {patients && !selected && (
+            <Alert severity="info">Bitte oben einen Patienten auswählen.</Alert>
+          )}
+
+          {selected && (
+            <Stack spacing={2}>
+              <ChartPlaceholder
+                title="Übersicht – gesamter Aufenthalt"
+                height={180}
+                note="Overview-Chart mit Zeitfenster-Brush folgt (Phase 3)"
+              />
+
+              {selectedParams.length > 0 ? (
+                <Box
+                  sx={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+                    gap: 2,
+                  }}
+                >
+                  {selectedParams.map((key) => {
+                    const def = PARAM_LOOKUP[key]
+                    return (
+                      <ChartPlaceholder
+                        key={key}
+                        title={def ? `${def.label} (${def.unit})` : key}
+                        height={140}
+                        note="Detail-Chart folgt (Phase 4)"
+                      />
+                    )
+                  })}
+                </Box>
+              ) : (
+                <Alert severity="info">Keine Parameter ausgewählt.</Alert>
+              )}
+
+              {summaryLoading && (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <CircularProgress size={20} />
+                  <Typography>Lade Patientendaten…</Typography>
+                </Box>
+              )}
+
+              {summary && (
+                <>
+                  <StatusBar summary={summary} />
+                  <PatientSummaryPanel summary={summary} />
+                </>
+              )}
+            </Stack>
+          )}
+        </Box>
+      </Box>
     </ThemeProvider>
   )
 }
