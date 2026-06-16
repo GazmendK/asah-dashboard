@@ -34,6 +34,19 @@ export interface PatientSummary extends Patient {
   outcome: Outcome
 }
 
+export interface TimeseriesPoint {
+  param: string
+  t: number
+  value: number | null
+}
+
+export interface TimeseriesResponse {
+  caseId: number
+  resolution: string
+  params: string[]
+  points: TimeseriesPoint[]
+}
+
 async function getJson<T>(path: string): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`)
   if (!res.ok) throw new Error(`HTTP ${res.status} bei ${path}`)
@@ -46,4 +59,13 @@ export function fetchPatients(): Promise<Patient[]> {
 
 export function fetchPatientSummary(caseId: number): Promise<PatientSummary> {
   return getJson<PatientSummary>(`/patients/${caseId}`)
+}
+
+export function fetchTimeseries(
+  caseId: number,
+  params: string[],
+  resolution: string,
+): Promise<TimeseriesResponse> {
+  const query = new URLSearchParams({ params: params.join(','), resolution })
+  return getJson<TimeseriesResponse>(`/patients/${caseId}/timeseries?${query.toString()}`)
 }

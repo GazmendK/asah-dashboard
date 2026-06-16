@@ -23,6 +23,7 @@ import { FilterPanel } from './components/FilterPanel'
 import { StatusBar } from './components/StatusBar'
 import { PatientSummaryPanel } from './components/PatientSummaryPanel'
 import { ChartPlaceholder } from './components/ChartPlaceholder'
+import { OverviewDetailChart } from './components/OverviewDetailChart'
 
 const PARAM_LOOKUP = Object.fromEntries(VITAL_PARAMS.map((p) => [p.key, p]))
 
@@ -155,32 +156,29 @@ function App() {
 
           {selected && (
             <Stack spacing={2}>
-              <ChartPlaceholder
-                title="Übersicht – gesamter Aufenthalt"
-                height={180}
-                note="Overview-Chart mit Zeitfenster-Brush folgt (Phase 3)"
-              />
-
               {selectedParams.length > 0 ? (
-                <Box
-                  sx={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-                    gap: 2,
-                  }}
-                >
-                  {selectedParams.map((key) => {
-                    const def = PARAM_LOOKUP[key]
-                    return (
-                      <ChartPlaceholder
-                        key={key}
-                        title={def ? `${def.label} (${def.unit})` : key}
-                        height={140}
-                        note="Detail-Chart folgt (Phase 4)"
-                      />
-                    )
-                  })}
-                </Box>
+                <>
+                  <OverviewDetailChart caseId={selected.caseId} param={selectedParams[0]} />
+                  <Box
+                    sx={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+                      gap: 2,
+                    }}
+                  >
+                    {selectedParams.map((key) => {
+                      const def = PARAM_LOOKUP[key]
+                      return (
+                        <ChartPlaceholder
+                          key={key}
+                          title={def ? `${def.label} (${def.unit})` : key}
+                          height={140}
+                          note="Detail-Chart folgt (Phase 4)"
+                        />
+                      )
+                    })}
+                  </Box>
+                </>
               ) : (
                 <Alert severity="info">Keine Parameter ausgewählt.</Alert>
               )}
