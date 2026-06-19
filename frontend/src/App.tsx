@@ -173,7 +173,7 @@ function App() {
                           key={key}
                           title={def ? `${def.label} (${def.unit})` : key}
                           height={140}
-                          note="Detail-Chart folgt (Phase 4)"
+                          note=""
                         />
                       )
                     })}
