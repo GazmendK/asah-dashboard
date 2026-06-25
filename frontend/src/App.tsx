@@ -15,17 +15,14 @@ import {
   type Patient,
   type PatientSummary,
 } from './api'
-import { DEFAULT_PARAMS, VITAL_PARAMS } from './constants'
+import { DEFAULT_PARAMS } from './constants'
 import type { Filters } from './types'
 import { theme } from './theme'
 import { AppHeader } from './components/AppHeader'
 import { FilterPanel } from './components/FilterPanel'
 import { StatusBar } from './components/StatusBar'
 import { PatientSummaryPanel } from './components/PatientSummaryPanel'
-import { ChartPlaceholder } from './components/ChartPlaceholder'
-import { OverviewDetailChart } from './components/OverviewDetailChart'
-
-const PARAM_LOOKUP = Object.fromEntries(VITAL_PARAMS.map((p) => [p.key, p]))
+import { VitalsPanel } from './components/VitalsPanel'
 
 const INITIAL_FILTERS: Filters = {
   ageRange: [0, 120],
@@ -157,28 +154,7 @@ function App() {
           {selected && (
             <Stack spacing={2}>
               {selectedParams.length > 0 ? (
-                <>
-                  <OverviewDetailChart caseId={selected.caseId} param={selectedParams[0]} />
-                  <Box
-                    sx={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-                      gap: 2,
-                    }}
-                  >
-                    {selectedParams.map((key) => {
-                      const def = PARAM_LOOKUP[key]
-                      return (
-                        <ChartPlaceholder
-                          key={key}
-                          title={def ? `${def.label} (${def.unit})` : key}
-                          height={140}
-                          note=""
-                        />
-                      )
-                    })}
-                  </Box>
-                </>
+                <VitalsPanel caseId={selected.caseId} params={selectedParams} />
               ) : (
                 <Alert severity="info">Keine Parameter ausgewählt.</Alert>
               )}
