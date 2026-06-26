@@ -164,6 +164,11 @@ def _derive_cpp(sub: pd.DataFrame, resolution: str) -> list[dict]:
             for t, v in cpp.items()]
 
 
+def available_labs(case_id: int) -> list[str]:
+    sub = _slice(store.labs, case_id)
+    return sorted(str(a) for a in sub["analyte"].unique())
+
+
 def labs(case_id: int, analytes: list[str] | None) -> list[dict]:
     sub = _slice(store.labs, case_id)
     if not analytes:

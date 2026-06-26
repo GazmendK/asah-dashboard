@@ -64,6 +64,12 @@ def get_labs(
     return {"caseId": case_id, "analytes": used, "points": points}
 
 
+@router.get("/{case_id}/labs/available", response_model=list[str])
+def get_available_labs(case_id: int):
+    _require_patient(case_id)
+    return dl.available_labs(case_id)
+
+
 @router.get("/{case_id}/complications", response_model=Complications)
 def get_complications(case_id: int):
     _require_patient(case_id)

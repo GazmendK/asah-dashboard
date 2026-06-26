@@ -1,28 +1,13 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Box, CircularProgress, Paper, Typography } from '@mui/material'
 import { VegaEmbed } from 'react-vega'
 import type { VisualizationSpec } from 'vega-embed'
 
 import { fetchTimeseries, type TimeseriesPoint } from '../api'
 import { THRESHOLDS, VITAL_PARAMS } from '../constants'
+import { useChartWidth } from '../useChartWidth'
 
 const PARAMS = Object.fromEntries(VITAL_PARAMS.map((p) => [p.key, p]))
-
-function useWidth() {
-  const ref = useRef<HTMLDivElement>(null)
-  const [width, setWidth] = useState(640)
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const observer = new ResizeObserver((entries) => {
-      const w = entries[0]?.contentRect.width
-      if (w) setWidth(Math.max(280, Math.floor(w) - 56))
-    })
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [])
-  return { ref, width }
-}
 
 function thresholdLayers(param: string): Record<string, unknown>[] {
   const th = THRESHOLDS[param]
@@ -115,7 +100,7 @@ interface Props {
 }
 
 export function VitalsPanel({ caseId, params }: Props) {
-  const { ref, width } = useWidth()
+  const { ref, width } = useChartWidth()
   const [points, setPoints] = useState<TimeseriesPoint[] | null>(null)
   const [error, setError] = useState<string | null>(null)
 

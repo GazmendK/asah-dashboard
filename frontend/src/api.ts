@@ -69,3 +69,28 @@ export function fetchTimeseries(
   const query = new URLSearchParams({ params: params.join(','), resolution })
   return getJson<TimeseriesResponse>(`/patients/${caseId}/timeseries?${query.toString()}`)
 }
+
+export interface LabPoint {
+  analyte: string
+  t: number
+  value: number | null
+  unit: string | null
+}
+
+export interface LabResponse {
+  caseId: number
+  analytes: string[]
+  points: LabPoint[]
+}
+
+export function fetchLabs(caseId: number, analytes?: string[]): Promise<LabResponse> {
+  if (analytes && analytes.length) {
+    const query = new URLSearchParams({ analytes: analytes.join(',') })
+    return getJson<LabResponse>(`/patients/${caseId}/labs?${query.toString()}`)
+  }
+  return getJson<LabResponse>(`/patients/${caseId}/labs`)
+}
+
+export function fetchAvailableLabs(caseId: number): Promise<string[]> {
+  return getJson<string[]>(`/patients/${caseId}/labs/available`)
+}
