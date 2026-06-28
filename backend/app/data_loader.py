@@ -4,7 +4,24 @@ import numpy as np
 import pandas as pd
 
 from . import config as C
-from .preprocessing import build_cache
+from .preprocessing import (
+    EXPECTED_PATIENT_COLUMNS,
+    LAB_COLUMNS,
+    PHYSIO_COLUMNS,
+    build_cache,
+)
+
+
+def _empty_patients() -> pd.DataFrame:
+    return pd.DataFrame(columns=EXPECTED_PATIENT_COLUMNS)
+
+
+def _empty_physio() -> pd.DataFrame:
+    return pd.DataFrame(columns=PHYSIO_COLUMNS)
+
+
+def _empty_labs() -> pd.DataFrame:
+    return pd.DataFrame(columns=LAB_COLUMNS)
 
 
 class _Store:
@@ -12,28 +29,53 @@ class _Store:
         self._patients: pd.DataFrame | None = None
         self._physio: pd.DataFrame | None = None
         self._labs: pd.DataFrame | None = None
+        self._source: str | None = None
 
-    def load(self) -> None:
+    def _set(self, patients, physio, labs, source) -> None:
+        self._patients = patients.reset_index(drop=True)
+        self._physio = physio.set_index("case_id").sort_index()
+        self._labs = labs.set_index("case_id").sort_index()
+        self._source = source
+
+    def load_demo(self) -> None:
         build_cache(force=False)
-        self._patients = pd.read_parquet(C.PATIENTS_PARQUET)
-        self._physio = pd.read_parquet(C.PHYSIO_PARQUET).set_index("case_id").sort_index()
-        self._labs = pd.read_parquet(C.LAB_PARQUET).set_index("case_id").sort_index()
+        self._set(
+            pd.read_parquet(C.PATIENTS_PARQUET),
+            pd.read_parquet(C.PHYSIO_PARQUET),
+            pd.read_parquet(C.LAB_PARQUET),
+            "demo",
+        )
+
+    def load_frames(self, frames: dict) -> None:
+        self._set(frames["patients"], frames["physio"], frames["labs"], "upload")
+
+    def _ensure(self) -> None:
+        if self._patients is not None:
+            return
+        if C.CLINICAL_CSV.exists() or C.PATIENTS_PARQUET.exists():
+            self.load_demo()
+        else:
+            self._set(_empty_patients(), _empty_physio(), _empty_labs(), None)
 
     @property
     def patients(self) -> pd.DataFrame:
-        if self._patients is None:
-            self.load()
+        self._ensure()
         return self._patients
+
     @property
     def physio(self) -> pd.DataFrame:
-        if self._physio is None:
-            self.load()
+        self._ensure()
         return self._physio
+
     @property
     def labs(self) -> pd.DataFrame:
-        if self._labs is None:
-            self.load()
+        self._ensure()
         return self._labs
+
+    def info(self) -> dict:
+        count = 0 if self._patients is None else int(len(self._patients))
+        return {"loaded": self._source is not None, "source": self._source, "patientCount": count}
+
 
 store = _Store()
 

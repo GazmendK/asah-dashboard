@@ -7,12 +7,13 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from . import config as C
 from .data_loader import store
-from .routers import patients
+from .routers import dataset, patients
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    store.load()
+    if C.CLINICAL_CSV.exists() or C.PATIENTS_PARQUET.exists():
+        store.load_demo()
     yield
 
 
@@ -26,11 +27,12 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=C.ALLOWED_ORIGINS,
-    allow_methods=["GET"],
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 
 app.include_router(patients.router)
+app.include_router(dataset.router)
 
 
 @app.get("/health", tags=["meta"])
