@@ -23,6 +23,7 @@ import { FilterPanel } from './components/FilterPanel'
 import { StatusBar } from './components/StatusBar'
 import { PatientSummaryPanel } from './components/PatientSummaryPanel'
 import { VitalsPanel } from './components/VitalsPanel'
+import { LabsPanel } from './components/LabsPanel'
 
 const INITIAL_FILTERS: Filters = {
   ageRange: [0, 120],
@@ -127,6 +128,8 @@ function App() {
             ageBounds={ageBounds}
             selectedParams={selectedParams}
             onParams={setSelectedParams}
+            patients={patients ?? []}
+            selected={selected}
           />
         </Box>
 
@@ -158,6 +161,8 @@ function App() {
               ) : (
                 <Alert severity="info">Keine Parameter ausgewählt.</Alert>
               )}
+
+              <LabsPanel caseId={selected.caseId} />
 
               {summaryLoading && (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
