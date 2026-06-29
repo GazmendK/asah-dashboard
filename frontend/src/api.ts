@@ -94,3 +94,44 @@ export function fetchLabs(caseId: number, analytes?: string[]): Promise<LabRespo
 export function fetchAvailableLabs(caseId: number): Promise<string[]> {
   return getJson<string[]>(`/patients/${caseId}/labs/available`)
 }
+
+export interface DatasetInfo {
+  loaded: boolean
+  source: string | null
+  patientCount: number
+}
+
+export interface DatasetFiles {
+  clinical: File
+  physiological?: File | null
+  laboratory?: File | null
+  complications?: File | null
+  outcome?: File | null
+}
+
+export async function uploadDataset(files: DatasetFiles): Promise<DatasetInfo> {
+  const form = new FormData()
+  form.append('clinical', files.clinical)
+  if (files.physiological) form.append('physiological', files.physiological)
+  if (files.laboratory) form.append('laboratory', files.laboratory)
+  if (files.complications) form.append('complications', files.complications)
+  if (files.outcome) form.append('outcome', files.outcome)
+
+  const res = await fetch(`${API_BASE}/dataset/upload`, { method: 'POST', body: form })
+  if (!res.ok) {
+    const fallback = `HTTP ${res.status}`
+    let detail = fallback
+    try {
+      const body = (await res.json()) as { detail?: string }
+      if (typeof body.detail === 'string') detail = body.detail
+    } catch {
+      detail = fallback
+    }
+    throw new Error(detail)
+  }
+  return res.json() as Promise<DatasetInfo>
+}
+
+export function fetchDatasetStatus(): Promise<DatasetInfo> {
+  return getJson<DatasetInfo>('/dataset/status')
+}

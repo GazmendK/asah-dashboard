@@ -1,15 +1,20 @@
-import { AppBar, Autocomplete, Box, Chip, TextField, Toolbar, Typography } from '@mui/material'
+import { useState } from 'react'
+import { AppBar, Autocomplete, Box, Button, Chip, TextField, Toolbar, Typography } from '@mui/material'
 
 import type { Patient } from '../api'
+import { DatasetUploadDialog } from './DatasetUploadDialog'
 
 interface Props {
   patients: Patient[]
   selected: Patient | null
   onSelect: (patient: Patient | null) => void
   stayDays: number | null
+  onDatasetLoaded: () => void
 }
 
-export function AppHeader({ patients, selected, onSelect, stayDays }: Props) {
+export function AppHeader({ patients, selected, onSelect, stayDays, onDatasetLoaded }: Props) {
+  const [uploadOpen, setUploadOpen] = useState(false)
+
   return (
     <AppBar position="static" color="default" elevation={1}>
       <Toolbar sx={{ gap: 2 }}>
@@ -38,7 +43,16 @@ export function AppHeader({ patients, selected, onSelect, stayDays }: Props) {
             }
           />
         )}
+        <Button variant="outlined" size="small" onClick={() => setUploadOpen(true)}>
+          Daten laden
+        </Button>
       </Toolbar>
+
+      <DatasetUploadDialog
+        open={uploadOpen}
+        onClose={() => setUploadOpen(false)}
+        onLoaded={onDatasetLoaded}
+      />
     </AppBar>
   )
 }

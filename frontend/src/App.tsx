@@ -53,8 +53,11 @@ function App() {
   const [summaryLoading, setSummaryLoading] = useState(false)
   const [filters, setFilters] = useState<Filters>(INITIAL_FILTERS)
   const [selectedParams, setSelectedParams] = useState<string[]>(DEFAULT_PARAMS)
+  const [reloadKey, setReloadKey] = useState(0)
 
   useEffect(() => {
+    setPatients(null)
+    setError(null)
     fetchPatients()
       .then((list) => {
         setPatients(list)
@@ -64,7 +67,7 @@ function App() {
         }
       })
       .catch((e: unknown) => setError(e instanceof Error ? e.message : String(e)))
-  }, [])
+  }, [reloadKey])
 
   useEffect(() => {
     if (!selected) {
@@ -107,6 +110,11 @@ function App() {
         selected={selected}
         onSelect={setSelected}
         stayDays={selected?.stayDays ?? null}
+        onDatasetLoaded={() => {
+          setSelected(null)
+          setSummary(null)
+          setReloadKey((k) => k + 1)
+        }}
       />
 
       <Box sx={{ display: 'flex', alignItems: 'stretch' }}>
