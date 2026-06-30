@@ -23,6 +23,7 @@ import { FilterPanel } from './components/FilterPanel'
 import { StatusBar } from './components/StatusBar'
 import { PatientSummaryPanel } from './components/PatientSummaryPanel'
 import { VitalsPanel } from './components/VitalsPanel'
+import { DualAxisChart } from './components/DualAxisChart'
 import { LabsPanel } from './components/LabsPanel'
 
 const INITIAL_FILTERS: Filters = {
@@ -169,6 +170,8 @@ function App() {
               ) : (
                 <Alert severity="info">Keine Parameter ausgewählt.</Alert>
               )}
+
+              <DualAxisChart caseId={selected.caseId} />
 
               <LabsPanel caseId={selected.caseId} />
 
