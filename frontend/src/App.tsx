@@ -174,23 +174,37 @@ function App() {
               <DualAxisChart caseId={selected.caseId} />
 
               <LabsPanel caseId={selected.caseId} />
-
-              {summaryLoading && (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                  <CircularProgress size={20} />
-                  <Typography>Lade Patientendaten…</Typography>
-                </Box>
-              )}
-
-              {summary && (
-                <>
-                  <StatusBar summary={summary} />
-                  <PatientSummaryPanel summary={summary} />
-                </>
-              )}
             </Stack>
           )}
         </Box>
+
+        {selected && (
+          <Box
+            component="aside"
+            sx={{
+              width: 320,
+              flexShrink: 0,
+              p: 2,
+              borderLeft: 1,
+              borderColor: 'divider',
+              height: 'calc(100vh - 64px)',
+              overflowY: 'auto',
+            }}
+          >
+            {summaryLoading && !summary && (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <CircularProgress size={20} />
+                <Typography variant="body2">Lade Patientendaten…</Typography>
+              </Box>
+            )}
+            {summary && (
+              <Stack spacing={2}>
+                <StatusBar summary={summary} />
+                <PatientSummaryPanel summary={summary} />
+              </Stack>
+            )}
+          </Box>
+        )}
       </Box>
     </ThemeProvider>
   )
