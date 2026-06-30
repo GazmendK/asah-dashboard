@@ -1,17 +1,18 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export function useChartWidth() {
-  const ref = useRef<HTMLDivElement>(null)
   const [width, setWidth] = useState(640)
+  const [node, setNode] = useState<HTMLDivElement | null>(null)
+
   useEffect(() => {
-    const el = ref.current
-    if (!el) return
+    if (!node) return
     const observer = new ResizeObserver((entries) => {
       const w = entries[0]?.contentRect.width
       if (w) setWidth(Math.max(280, Math.floor(w) - 56))
     })
-    observer.observe(el)
+    observer.observe(node)
     return () => observer.disconnect()
-  }, [])
-  return { ref, width }
+  }, [node])
+
+  return { ref: setNode, width }
 }
