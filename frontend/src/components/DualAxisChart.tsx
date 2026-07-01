@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
-import { Box, CircularProgress, Paper, Typography } from '@mui/material'
+import { Box, CircularProgress, Typography } from '@mui/material'
 import { VegaEmbed } from 'react-vega'
 import type { VisualizationSpec } from 'vega-embed'
 
 import { fetchTimeseries, type TimeseriesPoint } from '../api'
 import { THRESHOLDS } from '../constants'
-import { useChartWidth } from '../useChartWidth'
+import { ChartCard } from './ChartCard'
 
-function buildSpec(points: TimeseriesPoint[], width: number): VisualizationSpec {
+function buildSpec(points: TimeseriesPoint[], width: number, expanded: boolean): VisualizationSpec {
   const icpHigh = THRESHOLDS.ICP?.high
 
   const icpLayer: Record<string, unknown>[] = [
@@ -33,31 +33,54 @@ function buildSpec(points: TimeseriesPoint[], width: number): VisualizationSpec 
   const spec = {
     $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
     data: { values: points },
-    width,
-    height: 230,
-    encoding: { x: { field: 't', type: 'quantitative', title: 'Tag seit Aufnahme' } },
-    layer: [
+    spacing: 4,
+    vconcat: [
       {
+        width,
+        height: expanded ? 56 : 32,
         transform: [{ filter: "datum.param === 'BPMean'" }],
-        mark: { type: 'line', color: '#1f4e79', strokeWidth: 1.5 },
+        mark: { type: 'line', color: '#7a98b8' },
+        params: [{ name: 'brush', select: { type: 'interval', encodings: ['x'] } }],
         encoding: {
-          y: {
-            field: 'value',
-            type: 'quantitative',
-            axis: { title: 'MAP (mmHg)', titleColor: '#1f4e79' },
-          },
-          tooltip: [
-            { field: 't', type: 'quantitative', title: 'Tag', format: '.2f' },
-            { field: 'value', type: 'quantitative', title: 'MAP', format: '.1f' },
-          ],
+          x: { field: 't', type: 'quantitative', title: null, axis: { labels: false, ticks: false, domain: false } },
+          y: { field: 'value', type: 'quantitative', title: null, axis: { tickCount: 2, labelFontSize: 9 } },
         },
       },
       {
-        transform: [{ filter: "datum.param === 'ICP'" }],
-        layer: icpLayer,
+        width,
+        height: expanded ? 430 : 230,
+        encoding: {
+          x: {
+            field: 't',
+            type: 'quantitative',
+            title: 'Tag seit Aufnahme',
+            scale: { domain: { param: 'brush' } },
+          },
+        },
+        layer: [
+          {
+            transform: [{ filter: "datum.param === 'BPMean'" }],
+            mark: { type: 'line', color: '#1f4e79', strokeWidth: 1.5 },
+            encoding: {
+              y: {
+                field: 'value',
+                type: 'quantitative',
+                axis: { title: 'MAP (mmHg)', titleColor: '#1f4e79' },
+              },
+              tooltip: [
+                { field: 't', type: 'quantitative', title: 'Tag', format: '.2f' },
+                { field: 'value', type: 'quantitative', title: 'MAP', format: '.1f' },
+              ],
+            },
+          },
+          {
+            transform: [{ filter: "datum.param === 'ICP'" }],
+            layer: icpLayer,
+          },
+        ],
+        resolve: { scale: { y: 'independent' } },
       },
     ],
-    resolve: { scale: { y: 'independent' } },
     config: { view: { stroke: null }, axis: { labelFontSize: 10, titleFontSize: 11 } },
   }
   return spec as unknown as VisualizationSpec
@@ -68,7 +91,6 @@ interface Props {
 }
 
 export function DualAxisChart({ caseId }: Props) {
-  const { ref, width } = useChartWidth()
   const [points, setPoints] = useState<TimeseriesPoint[] | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -88,35 +110,35 @@ export function DualAxisChart({ caseId }: Props) {
     }
   }, [caseId])
 
+  const render = (width: number, expanded: boolean) => {
+    if (error) {
+      return (
+        <Typography variant="body2" color="error">
+          {error}
+        </Typography>
+      )
+    }
+    if (!points) {
+      return (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 4 }}>
+          <CircularProgress size={20} />
+          <Typography variant="body2">Lade MAP/ICP...</Typography>
+        </Box>
+      )
+    }
+    if (points.length === 0) {
+      return (
+        <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>
+          Keine MAP-/ICP-Daten für diesen Patienten.
+        </Typography>
+      )
+    }
+    return <VegaEmbed spec={buildSpec(points, width, expanded)} options={{ actions: false }} />
+  }
+
   return (
-    <Paper variant="outlined" sx={{ p: 2 }}>
-      <Typography variant="subtitle2" gutterBottom>
-        MAP &amp; ICP - Dual-Axis
-      </Typography>
-      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-        Zerebraler Perfusionsdruck (CPP = MAP − ICP)
-      </Typography>
-      <div ref={ref} style={{ width: '100%' }}>
-        {error && (
-          <Typography variant="body2" color="error">
-            {error}
-          </Typography>
-        )}
-        {!points && !error && (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 4 }}>
-            <CircularProgress size={20} />
-            <Typography variant="body2">Lade MAP/ICP…</Typography>
-          </Box>
-        )}
-        {points && points.length === 0 && (
-          <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>
-            Keine MAP-/ICP-Daten für diesen Patienten.
-          </Typography>
-        )}
-        {points && points.length > 0 && (
-          <VegaEmbed spec={buildSpec(points, width)} options={{ actions: false }} />
-        )}
-      </div>
-    </Paper>
+    <ChartCard title="MAP & ICP - Dual-Axis" caption="Zerebraler Perfusionsdruck (CPP = MAP − ICP)">
+      {render}
+    </ChartCard>
   )
 }

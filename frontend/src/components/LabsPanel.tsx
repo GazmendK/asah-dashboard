@@ -1,17 +1,14 @@
 import { useEffect, useState } from 'react'
-import { Autocomplete, Box, CircularProgress, Paper, TextField, Typography } from '@mui/material'
-import { VegaEmbed } from 'react-vega'
+import { Autocomplete, Stack, TextField, Typography } from '@mui/material'
 
 import { fetchAvailableLabs, fetchLabs, type LabPoint } from '../api'
-import { useChartWidth } from '../useChartWidth'
-import { buildLabsSpec } from './labsSpec'
+import { SeriesChart } from './SeriesChart'
 
 interface Props {
   caseId: number
 }
 
 export function LabsPanel({ caseId }: Props) {
-  const { ref, width } = useChartWidth()
   const [available, setAvailable] = useState<string[]>([])
   const [selected, setSelected] = useState<string[]>([])
   const [points, setPoints] = useState<LabPoint[] | null>(null)
@@ -44,13 +41,15 @@ export function LabsPanel({ caseId }: Props) {
       .catch((e: unknown) => setError(e instanceof Error ? e.message : String(e)))
   }
 
+  const unitOf: Record<string, string> = {}
+  for (const p of points ?? []) {
+    if (p.unit) unitOf[p.analyte] = p.unit
+  }
+
   return (
-    <Paper variant="outlined" sx={{ p: 2 }}>
-      <Typography variant="subtitle2" gutterBottom>
-        Laborwerte
-      </Typography>
-      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5 }}>
-        Punktverlauf je Analyt · ohne Referenzband (Normwerte fehlen in den Daten)
+    <Stack spacing={2}>
+      <Typography variant="overline" color="text.secondary">
+        Laborwerte - ohne Referenzband (Normwerte fehlen in den Daten)
       </Typography>
       <Autocomplete
         multiple
@@ -60,34 +59,22 @@ export function LabsPanel({ caseId }: Props) {
         onChange={(_, value) => changeSelected(value)}
         renderInput={(params) => <TextField {...params} label="Analyte" placeholder="Analyt hinzufügen" />}
         limitTags={6}
-        sx={{ mb: 2 }}
       />
-      <div ref={ref} style={{ width: '100%' }}>
-        {error && (
-          <Typography variant="body2" color="error">
-            {error}
-          </Typography>
-        )}
-        {!points && !error && (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 4 }}>
-            <CircularProgress size={20} />
-            <Typography variant="body2">Lade Laborwerte…</Typography>
-          </Box>
-        )}
-        {points && selected.length === 0 && (
-          <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>
-            Keine Analyte ausgewählt.
-          </Typography>
-        )}
-        {points && selected.length > 0 && points.length === 0 && (
-          <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>
-            Keine Messwerte für die gewählten Analyte.
-          </Typography>
-        )}
-        {points && selected.length > 0 && points.length > 0 && (
-          <VegaEmbed spec={buildLabsSpec(points, width, selected)} options={{ actions: false }} />
-        )}
-      </div>
-    </Paper>
+      {selected.map((analyte) => {
+        const series = points
+          ? points.filter((p) => p.analyte === analyte).map((p) => ({ t: p.t, value: p.value }))
+          : null
+        return (
+          <SeriesChart
+            key={analyte}
+            title={unitOf[analyte] ? `${analyte} (${unitOf[analyte]})` : analyte}
+            valueLabel={analyte}
+            unit={unitOf[analyte]}
+            points={series}
+            error={error}
+          />
+        )
+      })}
+    </Stack>
   )
 }
