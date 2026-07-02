@@ -19,6 +19,7 @@ import { DEFAULT_PARAMS } from './constants'
 import type { Filters } from './types'
 import { theme } from './theme'
 import { AppHeader } from './components/AppHeader'
+import { SidePanel } from './components/SidePanel'
 import { FilterPanel } from './components/FilterPanel'
 import { StatusBar } from './components/StatusBar'
 import { PatientSummaryPanel } from './components/PatientSummaryPanel'
@@ -55,6 +56,10 @@ function App() {
   const [filters, setFilters] = useState<Filters>(INITIAL_FILTERS)
   const [selectedParams, setSelectedParams] = useState<string[]>(DEFAULT_PARAMS)
   const [reloadKey, setReloadKey] = useState(0)
+  const [leftCollapsed, setLeftCollapsed] = useState(false)
+  const [rightCollapsed, setRightCollapsed] = useState(false)
+  const [leftWidth, setLeftWidth] = useState(280)
+  const [rightWidth, setRightWidth] = useState(320)
 
   useEffect(() => {
     setPatients(null)
@@ -119,17 +124,12 @@ function App() {
       />
 
       <Box sx={{ display: 'flex', alignItems: 'stretch' }}>
-        <Box
-          component="aside"
-          sx={{
-            width: 280,
-            flexShrink: 0,
-            p: 2,
-            borderRight: 1,
-            borderColor: 'divider',
-            height: 'calc(100vh - 64px)',
-            overflowY: 'auto',
-          }}
+        <SidePanel
+          side="left"
+          collapsed={leftCollapsed}
+          onToggle={() => setLeftCollapsed((v) => !v)}
+          width={leftWidth}
+          onWidth={setLeftWidth}
         >
           <FilterPanel
             filters={filters}
@@ -140,7 +140,7 @@ function App() {
             patients={patients ?? []}
             selected={selected}
           />
-        </Box>
+        </SidePanel>
 
         <Box
           component="main"
@@ -179,17 +179,12 @@ function App() {
         </Box>
 
         {selected && (
-          <Box
-            component="aside"
-            sx={{
-              width: 320,
-              flexShrink: 0,
-              p: 2,
-              borderLeft: 1,
-              borderColor: 'divider',
-              height: 'calc(100vh - 64px)',
-              overflowY: 'auto',
-            }}
+          <SidePanel
+            side="right"
+            collapsed={rightCollapsed}
+            onToggle={() => setRightCollapsed((v) => !v)}
+            width={rightWidth}
+            onWidth={setRightWidth}
           >
             {summaryLoading && !summary && (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -203,7 +198,7 @@ function App() {
                 <PatientSummaryPanel summary={summary} />
               </Stack>
             )}
-          </Box>
+          </SidePanel>
         )}
       </Box>
     </ThemeProvider>
