@@ -7,3 +7,7 @@ body,
 body {
   margin: 0;
 }
+
+#vg-tooltip-element {
+  z-index: 1400 !important;
+}
