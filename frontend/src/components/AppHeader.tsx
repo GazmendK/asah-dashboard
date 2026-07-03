@@ -1,7 +1,19 @@
 import { useState } from 'react'
-import { AppBar, Autocomplete, Box, Button, Chip, TextField, Toolbar, Typography } from '@mui/material'
+import {
+  AppBar,
+  Autocomplete,
+  Box,
+  Button,
+  Chip,
+  TextField,
+  ToggleButton,
+  ToggleButtonGroup,
+  Toolbar,
+  Typography,
+} from '@mui/material'
 
 import type { Patient } from '../api'
+import { useLanguage } from '../i18n'
 import { DatasetUploadDialog } from './DatasetUploadDialog'
 
 interface Props {
@@ -14,6 +26,7 @@ interface Props {
 
 export function AppHeader({ patients, selected, onSelect, stayDays, onDatasetLoaded }: Props) {
   const [uploadOpen, setUploadOpen] = useState(false)
+  const { lang, setLang } = useLanguage()
 
   return (
     <AppBar position="static" color="default" elevation={1}>
@@ -46,6 +59,20 @@ export function AppHeader({ patients, selected, onSelect, stayDays, onDatasetLoa
         <Button variant="outlined" size="small" onClick={() => setUploadOpen(true)}>
           Daten laden
         </Button>
+        <ToggleButtonGroup
+          size="small"
+          exclusive
+          value={lang}
+          onChange={(_, value) => value && setLang(value)}
+          aria-label="Sprache"
+        >
+          <ToggleButton value="de" aria-label="Deutsch">
+            DE
+          </ToggleButton>
+          <ToggleButton value="en" aria-label="English">
+            EN
+          </ToggleButton>
+        </ToggleButtonGroup>
       </Toolbar>
 
       <DatasetUploadDialog
