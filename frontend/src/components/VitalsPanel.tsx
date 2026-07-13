@@ -3,6 +3,7 @@ import { Stack, Typography } from '@mui/material'
 
 import { fetchTimeseries, type TimeseriesPoint } from '../api'
 import { THRESHOLDS, VITAL_PARAMS } from '../constants'
+import { useLanguage } from '../i18n'
 import { SeriesChart } from './SeriesChart'
 
 const PARAMS = Object.fromEntries(VITAL_PARAMS.map((p) => [p.key, p]))
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export function VitalsPanel({ caseId, params }: Props) {
+  const { t } = useLanguage()
   const [points, setPoints] = useState<TimeseriesPoint[] | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -35,18 +37,19 @@ export function VitalsPanel({ caseId, params }: Props) {
   return (
     <Stack spacing={2}>
       <Typography variant="overline" color="text.secondary">
-        Vitalverläufe
+        {t('vitals.title')}
       </Typography>
       {params.map((param) => {
         const def = PARAMS[param]
+        const label = t(`param.${param}`)
         const series = points
           ? points.filter((p) => p.param === param).map((p) => ({ t: p.t, value: p.value }))
           : null
         return (
           <SeriesChart
             key={param}
-            title={def ? `${def.label} (${def.unit})` : param}
-            valueLabel={def?.label ?? param}
+            title={def ? `${label} (${def.unit})` : label}
+            valueLabel={label}
             unit={def?.unit}
             threshold={THRESHOLDS[param]}
             points={series}

@@ -18,6 +18,7 @@ import {
   VITAL_PARAMS,
   WFNS_CATEGORIES,
 } from '../constants'
+import { useLanguage } from '../i18n'
 import type { Filters } from '../types'
 
 interface Props {
@@ -42,14 +43,14 @@ function passes(p: Patient, f: Filters, except?: keyof Filters): boolean {
 
 const CAT_FILTERS: {
   dim: keyof Filters
-  title: string
+  titleKey: string
   values: (string | number)[]
   get: (p: Patient) => string | number | null
 }[] = [
-  { dim: 'fisher', title: 'Fisher-Grad', values: FISHER_GRADES, get: (p) => p.fisher },
-  { dim: 'mFisher', title: 'mFisher-Grad', values: MFISHER_GRADES, get: (p) => p.mFisher },
-  { dim: 'wfns', title: 'WFNS', values: WFNS_CATEGORIES, get: (p) => p.wfns },
-  { dim: 'location', title: 'Aneurysma-Lokalisation', values: LOCATIONS, get: (p) => p.aneurysmLocation },
+  { dim: 'fisher', titleKey: 'score.fisher', values: FISHER_GRADES, get: (p) => p.fisher },
+  { dim: 'mFisher', titleKey: 'score.mFisher', values: MFISHER_GRADES, get: (p) => p.mFisher },
+  { dim: 'wfns', titleKey: 'score.wfns', values: WFNS_CATEGORIES, get: (p) => p.wfns },
+  { dim: 'location', titleKey: 'score.location', values: LOCATIONS, get: (p) => p.aneurysmLocation },
 ]
 
 function Bar({
@@ -87,6 +88,14 @@ function Bar({
 }
 
 export function FilterPanel({ filters, onFilters, ageBounds, selectedParams, onParams, patients = [], selected = null }: Props) {
+  const { t } = useLanguage()
+
+  const valueLabel = (dim: keyof Filters, v: string | number) => {
+    if (dim === 'wfns') return t(`wfns.${v}`)
+    if (dim === 'location') return t(`location.${v}`)
+    return String(v)
+  }
+
   const toggleParam = (key: string) => {
     onParams(
       selectedParams.includes(key)
@@ -118,16 +127,16 @@ export function FilterPanel({ filters, onFilters, ageBounds, selectedParams, onP
     <Stack spacing={2.5}>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Typography variant="overline" color="text.secondary">
-          Filter &amp; Auswahl
+          {t('filter.title')}
         </Typography>
         <Button size="small" onClick={reset} disabled={!filtersActive}>
-          Zurücksetzen
+          {t('filter.reset')}
         </Button>
       </Box>
 
       <Box>
         <Typography variant="body2" gutterBottom>
-          Alter: {filters.ageRange[0]}–{filters.ageRange[1]}
+          {t('filter.age')}: {filters.ageRange[0]}–{filters.ageRange[1]}
         </Typography>
         <Box sx={{ mb: 1 }}>
           {ageDecades.map((d, i) => {
@@ -163,7 +172,7 @@ export function FilterPanel({ filters, onFilters, ageBounds, selectedParams, onP
         return (
           <Box key={cf.dim}>
             <Typography variant="body2" gutterBottom>
-              {cf.title}
+              {t(cf.titleKey)}
             </Typography>
             {cf.values.map((v, i) => {
               const isSel = sel.includes(v)
@@ -173,7 +182,7 @@ export function FilterPanel({ filters, onFilters, ageBounds, selectedParams, onP
               return (
                 <Bar
                   key={String(v)}
-                  label={String(v)}
+                  label={valueLabel(cf.dim, v)}
                   count={counts[i]}
                   max={max}
                   tone={tone}
@@ -189,7 +198,7 @@ export function FilterPanel({ filters, onFilters, ageBounds, selectedParams, onP
       <Divider />
 
       <Typography variant="overline" color="text.secondary">
-        Parameter anzeigen
+        {t('filter.showParams')}
       </Typography>
       <FormGroup>
         {VITAL_PARAMS.map((param) => (
@@ -202,7 +211,7 @@ export function FilterPanel({ filters, onFilters, ageBounds, selectedParams, onP
                 onChange={() => toggleParam(param.key)}
               />
             }
-            label={<Typography variant="body2">{param.label}</Typography>}
+            label={<Typography variant="body2">{t(`param.${param.key}`)}</Typography>}
           />
         ))}
       </FormGroup>
