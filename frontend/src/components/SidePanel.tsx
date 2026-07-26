@@ -3,6 +3,8 @@ import { Box, IconButton } from '@mui/material'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 
+import { useLanguage } from '../i18n'
+
 const PANEL_HEIGHT = 'calc(100vh - 64px)'
 
 interface ResizerProps {
@@ -50,6 +52,7 @@ interface Props {
 }
 
 export function SidePanel({ side, collapsed, onToggle, width, onWidth, min = 200, max = 480, children }: Props) {
+  const { t } = useLanguage()
   const borderSide = side === 'left' ? { borderRight: 1 } : { borderLeft: 1 }
 
   if (collapsed) {
@@ -66,7 +69,7 @@ export function SidePanel({ side, collapsed, onToggle, width, onWidth, min = 200
           pt: 1,
         }}
       >
-        <IconButton size="small" onClick={onToggle} aria-label="Ausklappen">
+        <IconButton size="small" onClick={onToggle} aria-label={t('panel.expand')}>
           {side === 'left' ? <ChevronRightIcon fontSize="small" /> : <ChevronLeftIcon fontSize="small" />}
         </IconButton>
       </Box>
@@ -87,7 +90,7 @@ export function SidePanel({ side, collapsed, onToggle, width, onWidth, min = 200
       }}
     >
       <Box sx={{ display: 'flex', justifyContent: side === 'left' ? 'flex-end' : 'flex-start', mb: 1 }}>
-        <IconButton size="small" onClick={onToggle} aria-label="Einklappen">
+        <IconButton size="small" onClick={onToggle} aria-label={t('panel.collapse')}>
           {side === 'left' ? <ChevronLeftIcon fontSize="small" /> : <ChevronRightIcon fontSize="small" />}
         </IconButton>
       </Box>

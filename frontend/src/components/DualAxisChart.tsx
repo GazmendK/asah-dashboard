@@ -5,9 +5,16 @@ import type { VisualizationSpec } from 'vega-embed'
 
 import { fetchTimeseries, type TimeseriesPoint } from '../api'
 import { THRESHOLDS } from '../constants'
+import { useLanguage } from '../i18n'
 import { ChartCard } from './ChartCard'
 
-function buildSpec(points: TimeseriesPoint[], width: number, expanded: boolean): VisualizationSpec {
+function buildSpec(
+  points: TimeseriesPoint[],
+  width: number,
+  expanded: boolean,
+  dayLabel: string,
+  xTitle: string,
+): VisualizationSpec {
   const icpHigh = THRESHOLDS.ICP?.high
 
   const icpLayer: Record<string, unknown>[] = [
@@ -20,7 +27,7 @@ function buildSpec(points: TimeseriesPoint[], width: number, expanded: boolean):
           axis: { title: 'ICP (mmHg)', titleColor: '#b8860b', orient: 'right' },
         },
         tooltip: [
-          { field: 't', type: 'quantitative', title: 'Tag', format: '.2f' },
+          { field: 't', type: 'quantitative', title: dayLabel, format: '.2f' },
           { field: 'value', type: 'quantitative', title: 'ICP', format: '.1f' },
         ],
       },
@@ -53,7 +60,7 @@ function buildSpec(points: TimeseriesPoint[], width: number, expanded: boolean):
           x: {
             field: 't',
             type: 'quantitative',
-            title: 'Tag seit Aufnahme',
+            title: xTitle,
             scale: { domain: { param: 'brush' } },
           },
         },
@@ -68,7 +75,7 @@ function buildSpec(points: TimeseriesPoint[], width: number, expanded: boolean):
                 axis: { title: 'MAP (mmHg)', titleColor: '#1f4e79' },
               },
               tooltip: [
-                { field: 't', type: 'quantitative', title: 'Tag', format: '.2f' },
+                { field: 't', type: 'quantitative', title: dayLabel, format: '.2f' },
                 { field: 'value', type: 'quantitative', title: 'MAP', format: '.1f' },
               ],
             },
@@ -91,6 +98,7 @@ interface Props {
 }
 
 export function DualAxisChart({ caseId }: Props) {
+  const { t } = useLanguage()
   const [points, setPoints] = useState<TimeseriesPoint[] | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -122,22 +130,27 @@ export function DualAxisChart({ caseId }: Props) {
       return (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 4 }}>
           <CircularProgress size={20} />
-          <Typography variant="body2">Lade MAP/ICP...</Typography>
+          <Typography variant="body2">{t('dual.loading')}</Typography>
         </Box>
       )
     }
     if (points.length === 0) {
       return (
         <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>
-          Keine MAP-/ICP-Daten für diesen Patienten.
+          {t('dual.noData')}
         </Typography>
       )
     }
-    return <VegaEmbed spec={buildSpec(points, width, expanded)} options={{ actions: false }} />
+    return (
+      <VegaEmbed
+        spec={buildSpec(points, width, expanded, t('chart.day'), t('chart.daySinceAdmission'))}
+        options={{ actions: false }}
+      />
+    )
   }
 
   return (
-    <ChartCard title="MAP & ICP - Dual-Axis" caption="Zerebraler Perfusionsdruck (CPP = MAP − ICP)">
+    <ChartCard title={t('dual.title')} caption={t('dual.caption')}>
       {render}
     </ChartCard>
   )

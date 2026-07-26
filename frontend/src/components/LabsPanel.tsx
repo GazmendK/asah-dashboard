@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Autocomplete, Stack, TextField, Typography } from '@mui/material'
 
 import { fetchAvailableLabs, fetchLabs, type LabPoint } from '../api'
+import { useLanguage } from '../i18n'
 import { SeriesChart } from './SeriesChart'
 
 interface Props {
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export function LabsPanel({ caseId }: Props) {
+  const { t } = useLanguage()
   const [available, setAvailable] = useState<string[]>([])
   const [selected, setSelected] = useState<string[]>([])
   const [points, setPoints] = useState<LabPoint[] | null>(null)
@@ -49,7 +51,7 @@ export function LabsPanel({ caseId }: Props) {
   return (
     <Stack spacing={2}>
       <Typography variant="overline" color="text.secondary">
-        Laborwerte - ohne Referenzband (Normwerte fehlen in den Daten)
+        {t('labs.title')}
       </Typography>
       <Autocomplete
         multiple
@@ -57,7 +59,9 @@ export function LabsPanel({ caseId }: Props) {
         options={available}
         value={selected}
         onChange={(_, value) => changeSelected(value)}
-        renderInput={(params) => <TextField {...params} label="Analyte" placeholder="Analyt hinzufügen" />}
+        renderInput={(params) => (
+          <TextField {...params} label={t('labs.analytes')} placeholder={t('labs.addAnalyte')} />
+        )}
         limitTags={6}
       />
       {selected.map((analyte) => {

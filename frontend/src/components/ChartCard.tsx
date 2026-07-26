@@ -5,6 +5,7 @@ import CloseFullscreenIcon from '@mui/icons-material/CloseFullscreen'
 import OpenInFullIcon from '@mui/icons-material/OpenInFull'
 
 import { useChartWidth } from '../useChartWidth'
+import { useLanguage } from '../i18n'
 
 interface Props {
   title: string
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export function ChartCard({ title, caption, children }: Props) {
+  const { t } = useLanguage()
   const [open, setOpen] = useState(false)
   const inline = useChartWidth()
   const dialog = useChartWidth()
@@ -32,7 +34,7 @@ export function ChartCard({ title, caption, children }: Props) {
       <IconButton
         size="small"
         onClick={() => setOpen(!expanded)}
-        aria-label={expanded ? 'Verkleinern' : 'Vergrößern'}
+        aria-label={expanded ? t('chart.shrink') : t('chart.enlarge')}
       >
         {expanded ? <CloseFullscreenIcon fontSize="small" /> : <OpenInFullIcon fontSize="small" />}
       </IconButton>

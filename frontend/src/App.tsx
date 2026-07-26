@@ -17,6 +17,7 @@ import {
 } from './api'
 import { DEFAULT_PARAMS } from './constants'
 import type { Filters } from './types'
+import { useLanguage } from './i18n'
 import { theme } from './theme'
 import { AppHeader } from './components/AppHeader'
 import { SidePanel } from './components/SidePanel'
@@ -60,6 +61,7 @@ function App() {
   const [rightCollapsed, setRightCollapsed] = useState(false)
   const [leftWidth, setLeftWidth] = useState(280)
   const [rightWidth, setRightWidth] = useState(320)
+  const { t } = useLanguage()
 
   useEffect(() => {
     setPatients(null)
@@ -155,12 +157,12 @@ function App() {
           {!patients && !error && (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
               <CircularProgress size={20} />
-              <Typography>Lade Patienten…</Typography>
+              <Typography>{t('app.loadingPatients')}</Typography>
             </Box>
           )}
 
           {patients && !selected && (
-            <Alert severity="info">Bitte oben einen Patienten auswählen.</Alert>
+            <Alert severity="info">{t('app.selectPrompt')}</Alert>
           )}
 
           {selected && (
@@ -168,7 +170,7 @@ function App() {
               {selectedParams.length > 0 ? (
                 <VitalsPanel caseId={selected.caseId} params={selectedParams} />
               ) : (
-                <Alert severity="info">Keine Parameter ausgewählt.</Alert>
+                <Alert severity="info">{t('app.noParams')}</Alert>
               )}
 
               <DualAxisChart caseId={selected.caseId} />
@@ -189,7 +191,7 @@ function App() {
             {summaryLoading && !summary && (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                 <CircularProgress size={20} />
-                <Typography variant="body2">Lade Patientendaten…</Typography>
+                <Typography variant="body2">{t('app.loadingPatient')}</Typography>
               </Box>
             )}
             {summary && (

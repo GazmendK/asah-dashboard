@@ -26,13 +26,13 @@ interface Props {
 
 export function AppHeader({ patients, selected, onSelect, stayDays, onDatasetLoaded }: Props) {
   const [uploadOpen, setUploadOpen] = useState(false)
-  const { lang, setLang } = useLanguage()
+  const { lang, setLang, t } = useLanguage()
 
   return (
     <AppBar position="static" color="default" elevation={1}>
       <Toolbar sx={{ gap: 2 }}>
         <Typography variant="h6" component="div" sx={{ flexShrink: 0 }}>
-          aSAB-Verlaufsdashboard
+          {t('app.title')}
         </Typography>
         <Autocomplete
           size="small"
@@ -40,9 +40,11 @@ export function AppHeader({ patients, selected, onSelect, stayDays, onDatasetLoa
           options={patients}
           value={selected}
           onChange={(_, value) => onSelect(value)}
-          getOptionLabel={(p) => `Fall ${p.caseId} · ${p.age ?? '–'} J. · ${p.sex ?? '–'}`}
+          getOptionLabel={(p) =>
+            `${t('header.case')} ${p.caseId} · ${p.age ?? '–'} ${t('header.years')} · ${p.sex ? t(`sex.${p.sex}`) : '–'}`
+          }
           isOptionEqualToValue={(a, b) => a.caseId === b.caseId}
-          renderInput={(params) => <TextField {...params} label="Patient auswählen" />}
+          renderInput={(params) => <TextField {...params} label={t('header.selectPatient')} />}
         />
         <Box sx={{ flexGrow: 1 }} />
         {selected && (
@@ -51,20 +53,20 @@ export function AppHeader({ patients, selected, onSelect, stayDays, onDatasetLoa
             variant="outlined"
             label={
               stayDays != null
-                ? `Aufenthalt: Tag 0 – Tag ${Math.ceil(stayDays)}`
-                : 'Aufenthalt: –'
+                ? t('header.stay', { days: Math.ceil(stayDays) })
+                : t('header.stayNone')
             }
           />
         )}
         <Button variant="outlined" size="small" onClick={() => setUploadOpen(true)}>
-          Daten laden
+          {t('header.loadData')}
         </Button>
         <ToggleButtonGroup
           size="small"
           exclusive
           value={lang}
           onChange={(_, value) => value && setLang(value)}
-          aria-label="Sprache"
+          aria-label={t('header.language')}
         >
           <ToggleButton value="de" aria-label="Deutsch">
             DE

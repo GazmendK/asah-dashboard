@@ -2,6 +2,7 @@ import { Box, CircularProgress, Typography } from '@mui/material'
 import { VegaEmbed } from 'react-vega'
 import type { VisualizationSpec } from 'vega-embed'
 
+import { useLanguage } from '../i18n'
 import { ChartCard } from './ChartCard'
 
 export interface SeriesPoint {
@@ -31,6 +32,8 @@ function buildSpec(
   unit: string | null | undefined,
   valueLabel: string,
   threshold: Threshold | undefined,
+  dayLabel: string,
+  xTitle: string,
 ): VisualizationSpec {
   const tests: string[] = []
   if (threshold?.high != null) tests.push(`datum.value > ${threshold.high}`)
@@ -46,7 +49,7 @@ function buildSpec(
           ? { condition: { test, value: '#c0392b' }, value: '#1f4e79' }
           : { value: '#1f4e79' },
         tooltip: [
-          { field: 't', type: 'quantitative', title: 'Tag', format: '.2f' },
+          { field: 't', type: 'quantitative', title: dayLabel, format: '.2f' },
           { field: 'value', type: 'quantitative', title: valueLabel, format: '.2f' },
         ],
       },
@@ -82,7 +85,7 @@ function buildSpec(
           x: {
             field: 't',
             type: 'quantitative',
-            title: 'Tag seit Aufnahme',
+            title: xTitle,
             scale: { domain: { param: 'brush' } },
           },
           y: { field: 'value', type: 'quantitative', title: unit ?? null, axis: { labelFontSize: 10 } },
@@ -95,6 +98,7 @@ function buildSpec(
 }
 
 export function SeriesChart({ title, caption, unit, valueLabel, threshold, points, error }: Props) {
+  const { t } = useLanguage()
   const render = (width: number, expanded: boolean) => {
     if (error) {
       return (
@@ -107,18 +111,32 @@ export function SeriesChart({ title, caption, unit, valueLabel, threshold, point
       return (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 3 }}>
           <CircularProgress size={18} />
-          <Typography variant="body2">Lade…</Typography>
+          <Typography variant="body2">{t('chart.loading')}</Typography>
         </Box>
       )
     }
     if (points.length === 0) {
       return (
         <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>
-          Keine Messwerte für diesen Patienten.
+          {t('chart.noData')}
         </Typography>
       )
     }
-    return <VegaEmbed spec={buildSpec(points, width, expanded, unit, valueLabel, threshold)} options={{ actions: false }} />
+    return (
+      <VegaEmbed
+        spec={buildSpec(
+          points,
+          width,
+          expanded,
+          unit,
+          valueLabel,
+          threshold,
+          t('chart.day'),
+          t('chart.daySinceAdmission'),
+        )}
+        options={{ actions: false }}
+      />
+    )
   }
 
   return (

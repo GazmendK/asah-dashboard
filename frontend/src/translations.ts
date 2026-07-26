@@ -4,6 +4,18 @@ type Dict = Record<string, string>
 
 const de: Dict = {
   'app.title': 'aSAB-Verlaufsdashboard',
+  'app.loadingPatients': 'Lade Patienten...',
+  'app.selectPrompt': 'Bitte oben einen Patienten auswählen.',
+  'app.noParams': 'Keine Parameter ausgewählt.',
+  'app.loadingPatient': 'Lade Patientendaten...',
+
+  'header.selectPatient': 'Patient auswählen',
+  'header.case': 'Fall',
+  'header.years': 'J.',
+  'header.stay': 'Aufenthalt: Tag 0 - Tag {days}',
+  'header.stayNone': 'Aufenthalt: -',
+  'header.loadData': 'Daten laden',
+  'header.language': 'Sprache',
 
   'filter.title': 'Filter & Auswahl',
   'filter.reset': 'Zurücksetzen',
@@ -65,10 +77,55 @@ const de: Dict = {
   'functional.unfavorable': 'ungünstig',
 
   'vitals.title': 'Vitalverläufe',
+
+  'labs.title': 'Laborwerte - ohne Referenzband (Normwerte fehlen in den Daten)',
+  'labs.analytes': 'Analyte',
+  'labs.addAnalyte': 'Analyt hinzufügen',
+
+  'chart.daySinceAdmission': 'Tag seit Aufnahme',
+  'chart.day': 'Tag',
+  'chart.loading': 'Lade...',
+  'chart.noData': 'Keine Messwerte für diesen Patienten.',
+  'chart.enlarge': 'Vergrößern',
+  'chart.shrink': 'Verkleinern',
+
+  'dual.title': 'MAP & ICP - Dual-Axis',
+  'dual.caption': 'Zerebraler Perfusionsdruck (CPP = MAP − ICP)',
+  'dual.loading': 'Lade MAP/ICP...',
+  'dual.noData': 'Keine MAP-/ICP-Daten für diesen Patienten.',
+
+  'panel.collapse': 'Einklappen',
+  'panel.expand': 'Ausklappen',
+
+  'upload.title': 'Eigene Daten laden',
+  'upload.intro':
+    'Lade die CSV-Dateien hoch. Die klinische Datei ist erforderlich, die übrigen sind optional. (keine dauerhafte Speicherung)',
+  'upload.slot.clinical': 'Klinische Daten (clinical)',
+  'upload.slot.physiological': 'Physiologische Zeitreihen',
+  'upload.slot.laboratory': 'Laborwerte',
+  'upload.slot.complications': 'Komplikationen',
+  'upload.slot.outcome': 'Outcome / Mortalität',
+  'upload.chooseFile': 'Datei wählen',
+  'upload.noFile': 'keine Datei',
+  'upload.busy': 'Daten werden hochgeladen und aufbereitet. Das kann einen Moment dauern',
+  'upload.cancel': 'Abbrechen',
+  'upload.submit': 'Hochladen',
 }
 
 const en: Dict = {
   'app.title': 'aSAH Course Dashboard',
+  'app.loadingPatients': 'Loading patients...',
+  'app.selectPrompt': 'Please select a patient above.',
+  'app.noParams': 'No parameters selected.',
+  'app.loadingPatient': 'Loading patient data...',
+
+  'header.selectPatient': 'Select patient',
+  'header.case': 'Case',
+  'header.years': 'yrs',
+  'header.stay': 'Stay: day 0 - day {days}',
+  'header.stayNone': 'Stay: -',
+  'header.loadData': 'Load data',
+  'header.language': 'Language',
 
   'filter.title': 'Filters & Selection',
   'filter.reset': 'Reset',
@@ -130,6 +187,39 @@ const en: Dict = {
   'functional.unfavorable': 'unfavorable',
 
   'vitals.title': 'Vital sign trends',
+
+  'labs.title': 'Laboratory values - no reference range (normal values missing in data)',
+  'labs.analytes': 'Analytes',
+  'labs.addAnalyte': 'Add analyte',
+
+  'chart.daySinceAdmission': 'Day since admission',
+  'chart.day': 'Day',
+  'chart.loading': 'Loading...',
+  'chart.noData': 'No measurements for this patient.',
+  'chart.enlarge': 'Enlarge',
+  'chart.shrink': 'Shrink',
+
+  'dual.title': 'MAP & ICP -- dual axis',
+  'dual.caption': 'Cerebral perfusion pressure (CPP = MAP − ICP)',
+  'dual.loading': 'Loading MAP/ICP...',
+  'dual.noData': 'No MAP/ICP data for this patient.',
+
+  'panel.collapse': 'Collapse',
+  'panel.expand': 'Expand',
+
+  'upload.title': 'Load your own data',
+  'upload.intro':
+    'Upload the CSV files. The clinical file is required, the others are optional. (no permanent storage)',
+  'upload.slot.clinical': 'Clinical data (clinical)',
+  'upload.slot.physiological': 'Physiological time series',
+  'upload.slot.laboratory': 'Laboratory values',
+  'upload.slot.complications': 'Complications',
+  'upload.slot.outcome': 'Outcome / mortality',
+  'upload.chooseFile': 'Choose file',
+  'upload.noFile': 'no file',
+  'upload.busy': 'Data is being uploaded and processed. This may take a moment.',
+  'upload.cancel': 'Cancel',
+  'upload.submit': 'Upload',
 }
 
 export const translations: Record<Lang, Dict> = { de, en }
