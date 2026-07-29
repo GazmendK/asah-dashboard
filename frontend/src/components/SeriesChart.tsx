@@ -40,11 +40,13 @@ function buildSpec(
   if (threshold?.low != null) tests.push(`datum.value < ${threshold.low}`)
   const test = tests.join(' || ')
 
+  const yEnc = { field: 'value', type: 'quantitative', title: unit ?? null, axis: { labelFontSize: 10 } }
   const detailLayer: Record<string, unknown>[] = [
-    { mark: { type: 'line', color: '#1f4e79', strokeWidth: 1.4 } },
+    { mark: { type: 'line', color: '#1f4e79', strokeWidth: 1.4 }, encoding: { y: yEnc } },
     {
       mark: { type: 'point', filled: true, size: expanded ? 42 : 22 },
       encoding: {
+        y: yEnc,
         color: test
           ? { condition: { test, value: '#c0392b' }, value: '#1f4e79' }
           : { value: '#1f4e79' },
@@ -55,11 +57,12 @@ function buildSpec(
       },
     },
   ]
+  const xAgg = { x: { aggregate: 'min', field: 't', type: 'quantitative' }, x2: { aggregate: 'max', field: 't' } }
   if (threshold?.high != null) {
-    detailLayer.push({ mark: { type: 'rule', color: '#c0392b', strokeDash: [4, 4] }, encoding: { y: { datum: threshold.high } } })
+    detailLayer.push({ mark: { type: 'rule', color: '#c0392b', strokeDash: [4, 4] }, encoding: { y: { datum: threshold.high }, ...xAgg } })
   }
   if (threshold?.low != null) {
-    detailLayer.push({ mark: { type: 'rule', color: '#c0392b', strokeDash: [4, 4] }, encoding: { y: { datum: threshold.low } } })
+    detailLayer.push({ mark: { type: 'rule', color: '#c0392b', strokeDash: [4, 4] }, encoding: { y: { datum: threshold.low }, ...xAgg } })
   }
 
   const spec = {
@@ -88,7 +91,6 @@ function buildSpec(
             title: xTitle,
             scale: { domain: { param: 'brush' } },
           },
-          y: { field: 'value', type: 'quantitative', title: unit ?? null, axis: { labelFontSize: 10 } },
         },
       },
     ],

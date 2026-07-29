@@ -34,7 +34,7 @@ function buildSpec(
     },
   ]
   if (icpHigh != null) {
-    icpLayer.push({ mark: { type: 'rule', color: '#c0392b', strokeDash: [4, 4] }, encoding: { y: { datum: icpHigh } } })
+    icpLayer.push({ mark: { type: 'rule', color: '#c0392b', strokeDash: [4, 4] }, encoding: { y: { datum: icpHigh }, x: { aggregate: 'min', field: 't', type: 'quantitative' }, x2: { aggregate: 'max', field: 't' } } })
   }
 
   const spec = {
