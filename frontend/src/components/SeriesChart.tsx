@@ -25,6 +25,22 @@ interface Props {
   error?: string | null
 }
 
+function insertGaps(points: SeriesPoint[]): SeriesPoint[] {
+  if (points.length < 3) return points
+  const gaps: number[] = []
+  for (let i = 1; i < points.length; i++) gaps.push(points[i].t - points[i - 1].t)
+  const sorted = [...gaps].sort((a, b) => a - b)
+  const median = sorted[Math.floor(sorted.length / 2)] || 0
+  const maxGap = Math.max(median * 3, 0.25)
+  const out: SeriesPoint[] = []
+  for (let i = 0; i < points.length; i++) {
+    out.push(points[i])
+    const next = points[i + 1]
+    if (next && next.t - points[i].t > maxGap) out.push({ t: (points[i].t + next.t) / 2, value: null })
+  }
+  return out
+}
+
 function buildSpec(
   points: SeriesPoint[],
   width: number,
@@ -64,10 +80,9 @@ function buildSpec(
   if (threshold?.low != null) {
     detailLayer.push({ mark: { type: 'rule', color: '#c0392b', strokeDash: [4, 4] }, encoding: { y: { datum: threshold.low }, ...xAgg } })
   }
-
   const spec = {
     $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
-    data: { values: points },
+    data: { values: insertGaps(points) },
     spacing: 4,
     vconcat: [
       {

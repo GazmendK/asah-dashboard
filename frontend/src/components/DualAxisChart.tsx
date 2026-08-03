@@ -8,6 +8,30 @@ import { THRESHOLDS } from '../constants'
 import { useLanguage } from '../i18n'
 import { ChartCard } from './ChartCard'
 
+function insertGapsMulti(points: TimeseriesPoint[]): TimeseriesPoint[] {
+  const byParam = new Map<string, TimeseriesPoint[]>()
+  for (const p of points) {
+    const arr = byParam.get(p.param)
+    if (arr) arr.push(p)
+    else byParam.set(p.param, [p])
+  }
+  const out: TimeseriesPoint[] = []
+  for (const arr of byParam.values()) {
+    arr.sort((a, b) => a.t - b.t)
+    const gaps: number[] = []
+    for (let i = 1; i < arr.length; i++) gaps.push(arr[i].t - arr[i - 1].t)
+    const sorted = [...gaps].sort((a, b) => a - b)
+    const median = sorted[Math.floor(sorted.length / 2)] || 0
+    const maxGap = Math.max(median * 3, 0.25)
+    for (let i = 0; i < arr.length; i++) {
+      out.push(arr[i])
+      const next = arr[i + 1]
+      if (next && next.t - arr[i].t > maxGap) out.push({ param: arr[i].param, t: (arr[i].t + next.t) / 2, value: null })
+    }
+  }
+  return out
+}
+
 function buildSpec(
   points: TimeseriesPoint[],
   width: number,
@@ -39,7 +63,7 @@ function buildSpec(
 
   const spec = {
     $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
-    data: { values: points },
+    data: { values: insertGapsMulti(points) },
     spacing: 4,
     vconcat: [
       {
