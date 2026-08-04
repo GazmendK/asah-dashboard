@@ -13,12 +13,15 @@ interface Props {
   params: string[]
 }
 
+// Small Multiples der Vitalverlaeufe
 export function VitalsPanel({ caseId, params }: Props) {
   const { t } = useLanguage()
   const [points, setPoints] = useState<TimeseriesPoint[] | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    // Verhindert, dass die Antwort eines vorherigen Patienten die Anzeige
+    // des inzwischen gewaehlten ueberschreibt.
     let active = true
     setPoints(null)
     setError(null)

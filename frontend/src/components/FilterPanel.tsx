@@ -31,6 +31,7 @@ interface Props {
   selected?: Patient | null
 }
 
+// Kern des Cross-Filters: prueft alle Filter ausser einem
 function passes(p: Patient, f: Filters, except?: keyof Filters): boolean {
   if (except !== 'ageRange' && p.age != null && (p.age < f.ageRange[0] || p.age > f.ageRange[1])) return false
   if (except !== 'fisher' && f.fisher.length && (p.fisher == null || !f.fisher.includes(p.fisher))) return false

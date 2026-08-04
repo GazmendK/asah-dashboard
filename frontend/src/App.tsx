@@ -28,6 +28,9 @@ import { VitalsPanel } from './components/VitalsPanel'
 import { DualAxisChart } from './components/DualAxisChart'
 import { LabsPanel } from './components/LabsPanel'
 
+// Wurzelkomponente. Haelt den gesamten geteilten Zustan
+
+// Ausgangszustand des Filters, leere Listen bedeuten keine Einschraenkung
 const INITIAL_FILTERS: Filters = {
   ageRange: [0, 120],
   fisher: [],
@@ -104,6 +107,8 @@ function App() {
 
   const options = useMemo(() => {
     const filtered = applyFilters(patients ?? [], filters)
+    // Faellt der gewaehlte Patient aus dem Filter, bleibt er in der Liste.
+    // Sonst wuerde die Auswahl beim Filtern unbemerkt verloren gehen.
     if (selected && !filtered.some((p) => p.caseId === selected.caseId)) {
       return [selected, ...filtered]
     }

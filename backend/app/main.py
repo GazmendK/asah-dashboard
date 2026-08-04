@@ -12,6 +12,7 @@ from .routers import dataset, patients
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Beim Start wird der Demo-Datensatz geladen, sofern lokal vorhanden
     if C.CLINICAL_CSV.exists() or C.PATIENTS_PARQUET.exists():
         store.load_demo()
     yield
@@ -24,6 +25,8 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# Frontend und Backend laufen auf verschiedenen Ports, daher muss der
+# Entwicklungsserver von Vite ausdruecklich freigegeben werden.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=C.ALLOWED_ORIGINS,
@@ -37,6 +40,7 @@ app.include_router(dataset.router)
 
 @app.get("/health", tags=["meta"])
 def health():
+    # Technischer Endpunkt zur Verfuegbarkeitspruefung, nicht Teil der Fachlogik
     return {"status": "ok", "patients": len(store.patients)}
 
 

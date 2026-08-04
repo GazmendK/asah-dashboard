@@ -25,11 +25,14 @@ interface Props {
   error?: string | null
 }
 
+// Vega-Lite unterbricht eine Linie genau dort, wo ein Punkt den Wert null hat
 function insertGaps(points: SeriesPoint[]): SeriesPoint[] {
   if (points.length < 3) return points
   const gaps: number[] = []
   for (let i = 1; i < points.length; i++) gaps.push(points[i].t - points[i - 1].t)
   const sorted = [...gaps].sort((a, b) => a - b)
+  // Der Median passt die Schwelle an die Abtastdichte der Reihe an, die
+  // Untergrenze von 0,25 Tagen verhindert das Zerstueckeln bei kurzen Pausen.
   const median = sorted[Math.floor(sorted.length / 2)] || 0
   const maxGap = Math.max(median * 3, 0.25)
   const out: SeriesPoint[] = []
@@ -51,6 +54,7 @@ function buildSpec(
   dayLabel: string,
   xTitle: string,
 ): VisualizationSpec {
+  // Bedingung, nach der ein Messpunkt als kritisch eingefaerbt wird
   const tests: string[] = []
   if (threshold?.high != null) tests.push(`datum.value > ${threshold.high}`)
   if (threshold?.low != null) tests.push(`datum.value < ${threshold.low}`)
@@ -73,6 +77,7 @@ function buildSpec(
       },
     },
   ]
+  // Die Schwellenlinie spannt sich ueber die volle Datenbreite
   const xAgg = { x: { aggregate: 'min', field: 't', type: 'quantitative' }, x2: { aggregate: 'max', field: 't' } }
   if (threshold?.high != null) {
     detailLayer.push({ mark: { type: 'rule', color: '#c0392b', strokeDash: [4, 4] }, encoding: { y: { datum: threshold.high }, ...xAgg } })
@@ -84,6 +89,7 @@ function buildSpec(
     $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
     data: { values: insertGaps(points) },
     spacing: 4,
+    // Overview + Detail
     vconcat: [
       {
         width,
@@ -104,6 +110,7 @@ function buildSpec(
             field: 't',
             type: 'quantitative',
             title: xTitle,
+            // bindet den Detailausschnitt an die Auswahl im Uebersichtsstreifen
             scale: { domain: { param: 'brush' } },
           },
         },

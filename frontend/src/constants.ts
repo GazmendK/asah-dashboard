@@ -1,10 +1,13 @@
 import type { Complications } from './api'
 
+// Fachliche Festlegungen der Oberflaeche an einer Stelle
 export interface VitalParamDef {
   key: string
   unit: string
 }
 
+// CPP steht mit in der Liste, obwohl er nicht gemessen, sondern vom Backend
+// aus MAP und ICP abgeleitet wird. Fuer die Anzeige verhaelt er sich gleich.
 export const VITAL_PARAMS: VitalParamDef[] = [
   { key: 'HF', unit: 'bpm' },
   { key: 'BPSystolic', unit: 'mmHg' },
@@ -17,13 +20,16 @@ export const VITAL_PARAMS: VitalParamDef[] = [
   { key: 'T', unit: '°C' },
 ]
 
+// Vorauswahl beim Start, bewusst klein gehalten statt aller neun Parameter
 export const DEFAULT_PARAMS = ['HF', 'BPMean', 'ICP', 'SPO2']
 
+// Auspraegungen der Filterhistogramme
 export const FISHER_GRADES = [1, 2, 3, 4]
 export const MFISHER_GRADES = [0, 1, 2, 3, 4]
 export const WFNS_CATEGORIES = ['good', 'poor']
 export const LOCATIONS = ['anterior', 'posterior']
 
+// Reihenfolge der Kurzmarken in der Statusleiste
 export const COMPLICATION_KEYS: (keyof Complications)[] = [
   'vasospasm',
   'dci',
@@ -34,6 +40,7 @@ export const COMPLICATION_KEYS: (keyof Complications)[] = [
   'infections',
 ]
 
+// Alarmgrenzen fuer die farbliche Hervorhebung
 export const THRESHOLDS: Record<string, { high?: number; low?: number }> = {
   ICP: { high: 22 },
   SPO2: { low: 90 },

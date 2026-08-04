@@ -9,6 +9,9 @@ interface Props {
   caseId: number
 }
 
+// Laborverlaeufe mit frei waehlbaren Analyten. Anders als bei den Vitalwerten
+// ist die Auswahl patientenabhaengig, da nicht bei jedem Fall dieselben der
+// 419 Analyten bestimmt wurden.
 export function LabsPanel({ caseId }: Props) {
   const { t } = useLanguage()
   const [available, setAvailable] = useState<string[]>([])
@@ -17,6 +20,7 @@ export function LabsPanel({ caseId }: Props) {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    // active verhindert spaet eintreffende Antwort eines zuvor gewaehlten Patienten
     let active = true
     setPoints(null)
     setError(null)
@@ -24,6 +28,7 @@ export function LabsPanel({ caseId }: Props) {
       .then(([avail, labs]) => {
         if (!active) return
         setAvailable(avail)
+        // meldet zurueck, welche voreingestellten Analyten tatsaechlich Werte hatten.
         setSelected(labs.analytes)
         setPoints(labs.points)
       })
@@ -43,6 +48,7 @@ export function LabsPanel({ caseId }: Props) {
       .catch((e: unknown) => setError(e instanceof Error ? e.message : String(e)))
   }
 
+  // Einheit je Analyt Sie beschriftet spaeter die y-Achse.
   const unitOf: Record<string, string> = {}
   for (const p of points ?? []) {
     if (p.unit) unitOf[p.analyte] = p.unit

@@ -5,6 +5,9 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 
 import { useLanguage } from '../i18n'
 
+// Rahmen der beiden Seitenspalten. Beide lassen sich einklappen
+
+// Volle Fensterhoehe abzueglich der Kopfleiste
 const PANEL_HEIGHT = 'calc(100vh - 64px)'
 
 interface ResizerProps {
@@ -15,12 +18,14 @@ interface ResizerProps {
   max: number
 }
 
+// Schmaler Ziehgriff am inneren Rand der Spalte
 function Resizer({ side, width, onWidth, min, max }: ResizerProps) {
   const onMouseDown = (e: ReactMouseEvent) => {
     e.preventDefault()
     const startX = e.clientX
     const startW = width
     const move = (ev: MouseEvent) => {
+      // Die rechte Spalte waechst nach links, deshalb das umgekehrte Vorzeichen
       const delta = ev.clientX - startX
       const next = side === 'left' ? startW + delta : startW - delta
       onWidth(Math.max(min, Math.min(max, next)))
@@ -29,6 +34,8 @@ function Resizer({ side, width, onWidth, min, max }: ResizerProps) {
       document.removeEventListener('mousemove', move)
       document.removeEventListener('mouseup', up)
     }
+    // Bewegung am Dokument statt am Griff, sonst bricht das Ziehen ab, sobald
+    // der Mauszeiger den schmalen Griff verlaesst.
     document.addEventListener('mousemove', move)
     document.addEventListener('mouseup', up)
   }

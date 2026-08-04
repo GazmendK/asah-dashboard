@@ -24,6 +24,7 @@ interface Props {
 
 type Slot = 'clinical' | 'physiological' | 'laboratory' | 'complications' | 'outcome'
 
+// Nur die klinische Datei ist Pflicht, sie liefert die Fallnummern, auf die alles andere verweist.
 const SLOTS: { key: Slot; labelKey: string; required: boolean }[] = [
   { key: 'clinical', labelKey: 'upload.slot.clinical', required: true },
   { key: 'physiological', labelKey: 'upload.slot.physiological', required: false },
@@ -60,10 +61,13 @@ export function DatasetUploadDialog({ open, onClose, onLoaded }: Props) {
     uploadDataset(payload)
       .then(() => {
         setBusy(false)
+        // onLoaded setzt die Patientenauswahl zurueck und laedt die Liste neu, da die bisherige Fallnummer im neuen Datensatz fehlen kann.
         onLoaded()
         onClose()
       })
       .catch((e: unknown) => {
+        // Bei einem Fehler bleibt der Dialog offen und zeigt die Meldung des
+        // Backends, etwa den Namen einer fehlenden Pflichtspalte.
         setBusy(false)
         setError(e instanceof Error ? e.message : String(e))
       })

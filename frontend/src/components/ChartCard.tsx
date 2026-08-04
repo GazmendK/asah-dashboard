@@ -10,12 +10,18 @@ import { useLanguage } from '../i18n'
 interface Props {
   title: string
   caption?: string
+  // Kein fertiges Element, sondern eine Funktion. Nur so kann dieselbe Grafik
+  // mit unterschiedlicher Breite fuer die eingebettete und die grosse Ansicht
+  // erzeugt werden, denn Vega-Lite braucht die Breite bereits beim Aufbau.
   children: (width: number, expanded: boolean) => ReactNode
 }
 
+// Gemeinsamer Rahmen aller Diagramme
 export function ChartCard({ title, caption, children }: Props) {
   const { t } = useLanguage()
   const [open, setOpen] = useState(false)
+  // Zwei getrennte Messungen, da eingebettete und vergroesserte Ansicht
+  // gleichzeitig bestehen und unterschiedlich breit sind.
   const inline = useChartWidth()
   const dialog = useChartWidth()
 
@@ -52,6 +58,8 @@ export function ChartCard({ title, caption, children }: Props) {
         <DialogContent>
           {header(true)}
           <div ref={dialog.ref} style={{ width: '100%' }}>
+            {/* Nur bei geoeffnetem Dialog aufbauen, sonst entstuende die
+                zweite Grafik unsichtbar im Hintergrund mit. */}
             {open && children(dialog.width, true)}
           </div>
         </DialogContent>

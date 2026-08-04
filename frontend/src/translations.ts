@@ -1,3 +1,8 @@
+// Zentrales Woerterbuch der Oberflaeche. Jeder sichtbare Text steht hier und
+// wird ueber t('schluessel') aufgeloest, damit neue Texte an nur einer Stelle
+// gepflegt werden. Die Schluessel sind nach Bereichen benannt, etwa header,
+// filter, vitals. Beide Sprachen muessen dieselben Schluessel fuehren, sonst
+// faellt die Anzeige auf Deutsch zurueck.
 export type Lang = 'de' | 'en'
 
 type Dict = Record<string, string>
@@ -199,7 +204,7 @@ const en: Dict = {
   'chart.enlarge': 'Enlarge',
   'chart.shrink': 'Shrink',
 
-  'dual.title': 'MAP & ICP -- dual axis',
+  'dual.title': 'MAP & ICP - dual axis',
   'dual.caption': 'Cerebral perfusion pressure (CPP = MAP − ICP)',
   'dual.loading': 'Loading MAP/ICP...',
   'dual.noData': 'No MAP/ICP data for this patient.',

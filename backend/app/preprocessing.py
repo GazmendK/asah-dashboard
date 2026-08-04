@@ -95,6 +95,7 @@ def _load_labels(src, mapping: dict, name: str) -> pd.DataFrame:
 
 
 def _mark_plausibility(phys: pd.DataFrame) -> pd.DataFrame:
+    # Unplausible Werte werden auf NaN gesetzt statt geloescht
     for param, (lo, hi) in C.PLAUSIBILITY.items():
         mask = phys["param"].eq(param)
         bad = mask & ~phys["value"].between(lo, hi)
@@ -104,6 +105,7 @@ def _mark_plausibility(phys: pd.DataFrame) -> pd.DataFrame:
 
 
 def _stay_table(phys: pd.DataFrame | None, lab: pd.DataFrame | None):
+    # Tag 0 ist der frueheste Messzeitpunkt
     mins, maxs = [], []
     for frame in (phys, lab):
         if frame is not None and not frame.empty:
@@ -117,6 +119,7 @@ def _stay_table(phys: pd.DataFrame | None, lab: pd.DataFrame | None):
 
 
 def _rel_days(df: pd.DataFrame, t0: pd.Series) -> pd.Series:
+    # Absolute Zeitstempel werden in "Tage seit Aufnahme" umgerechnet
     delta = df["timestamp"] - df["case_id"].map(t0)
     return (delta.dt.total_seconds() / 86400.0).astype("float64")
 
@@ -163,6 +166,8 @@ def build_frames(sources: dict) -> dict:
     if sources.get("outcome") is not None:
         patients = patients.merge(_load_labels(sources["outcome"], OUTCOME_RENAME, "outcome"), on="case_id", how="left")
 
+    # reindex verwirft unbekannte Spalten der Rohdatei und ergaenzt fehlende
+    # erwartete Spalten als Leerwerte, sodass das Schema immer identisch ist.
     patients = patients.reindex(columns=EXPECTED_PATIENT_COLUMNS).sort_values("case_id").reset_index(drop=True)
     return {"patients": patients, "physio": physio_frame, "labs": labs_frame}
 

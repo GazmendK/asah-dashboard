@@ -24,6 +24,7 @@ interface Props {
   onDatasetLoaded: () => void
 }
 
+// Durchgehende Kopfleiste mit Patientenauswahl, Datenimport und Sprachwahl.
 export function AppHeader({ patients, selected, onSelect, stayDays, onDatasetLoaded }: Props) {
   const [uploadOpen, setUploadOpen] = useState(false)
   const { lang, setLang, t } = useLanguage()
@@ -40,6 +41,8 @@ export function AppHeader({ patients, selected, onSelect, stayDays, onDatasetLoa
           options={patients}
           value={selected}
           onChange={(_, value) => onSelect(value)}
+          // Fallnummer, Alter und Geschlecht im Eintrag, damit die Suche im
+          // Auswahlfeld auf alle drei Angaben zugleich greift.
           getOptionLabel={(p) =>
             `${t('header.case')} ${p.caseId} · ${p.age ?? '–'} ${t('header.years')} · ${p.sex ? t(`sex.${p.sex}`) : '–'}`
           }

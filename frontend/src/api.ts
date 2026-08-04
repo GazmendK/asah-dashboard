@@ -1,3 +1,6 @@
+// Einzige Stelle, an der das Frontend das Backend anspricht. Die Typen hier
+// spiegeln die Antwortschemata aus backend/app/models.py.
+// Adresse ueber Umgebungsvariable ueberschreibbar, Vorgabe ist der lokale Server.
 const API_BASE: string = import.meta.env.VITE_API_BASE ?? 'http://127.0.0.1:8000'
 
 export interface Patient {
@@ -47,6 +50,7 @@ export interface TimeseriesResponse {
   points: TimeseriesPoint[]
 }
 
+// Gemeinsamer Helfer aller lesenden Aufrufe
 async function getJson<T>(path: string): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`)
   if (!res.ok) throw new Error(`HTTP ${res.status} bei ${path}`)
@@ -66,6 +70,7 @@ export function fetchTimeseries(
   params: string[],
   resolution: string,
 ): Promise<TimeseriesResponse> {
+  // Parameterliste als Komma-String, wie es der Endpunkt erwartet
   const query = new URLSearchParams({ params: params.join(','), resolution })
   return getJson<TimeseriesResponse>(`/patients/${caseId}/timeseries?${query.toString()}`)
 }
@@ -109,6 +114,8 @@ export interface DatasetFiles {
   outcome?: File | null
 }
 
+// Einziger schreibender Aufruf. Als FormData statt JSON, weil ganze Dateien
+// uebertragen werden. Nur die klinische Datei ist Pflicht.
 export async function uploadDataset(files: DatasetFiles): Promise<DatasetInfo> {
   const form = new FormData()
   form.append('clinical', files.clinical)
@@ -119,6 +126,7 @@ export async function uploadDataset(files: DatasetFiles): Promise<DatasetInfo> {
 
   const res = await fetch(`${API_BASE}/dataset/upload`, { method: 'POST', body: form })
   if (!res.ok) {
+    // Das Backend legt den Grund in das Feld detail, etwa fehlende Pflichtspalten.
     const fallback = `HTTP ${res.status}`
     let detail = fallback
     try {

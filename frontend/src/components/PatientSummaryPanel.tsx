@@ -4,6 +4,9 @@ import { Box, Paper, Typography } from '@mui/material'
 import type { PatientSummary } from '../api'
 import { useLanguage } from '../i18n'
 
+// Zusammenfassung der statischen Patientenmerkmale unter der Statusleiste.
+
+// Einzelne Merkmalskachel aus Beschriftung und Wert
 function Stat({ label, value }: { label: string; value: ReactNode }) {
   return (
     <Box sx={{ p: 1.5, border: 1, borderColor: 'divider', borderRadius: 1, minWidth: 0 }}>
@@ -20,6 +23,7 @@ function Stat({ label, value }: { label: string; value: ReactNode }) {
 export function PatientSummaryPanel({ summary }: { summary: PatientSummary }) {
   const { t } = useLanguage()
 
+  // Outcome-Labels binaer kodiert. werden in Klartext uebersetzt, fehlender Wert bleibt als Strich stehen
   const mortality = (value: number | null) =>
     value == null ? '-' : value === 1 ? t('mortality.deceased') : t('mortality.survived')
   const functional = (value: number | null) =>

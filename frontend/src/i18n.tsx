@@ -12,11 +12,14 @@ interface LanguageContextValue {
   t: (key: string, vars?: TVars) => string
 }
 
+// Merkt die Sprachwahl ueber Sitzungen hinweg
 const STORAGE_KEY = 'asah-lang'
 
 function translate(lang: Lang, key: string, vars?: TVars): string {
+  // Fehlt ein Schluessel in der gewaehlten Sprache, greift Deutsch
   const template = translations[lang][key] ?? translations.de[key] ?? key
   if (!vars) return template
+  // Platzhalter der Form {name} werden durch uebergebene Werte ersetzt
   return template.replace(/\{(\w+)\}/g, (match, name) => (name in vars ? String(vars[name]) : match))
 }
 
@@ -31,6 +34,7 @@ function initialLang(): Lang {
   return stored === 'en' || stored === 'de' ? stored : 'de'
 }
 
+// Haelt die aktuelle Sprache und stellt die Funktion t bereit
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [lang, setLang] = useState<Lang>(initialLang)
 

@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
+# Antwortschemata der REST-Schnittstelle
+
 
 class PatientListItem(BaseModel):
     case_id: int = Field(alias="caseId")
@@ -57,6 +59,8 @@ class PatientSummary(BaseModel):
 
 
 class TimeseriesPoint(BaseModel):
+    # t ist die relative Zeit in Tagen seit dem ersten Messwert des Patienten.
+    # value darf None sein, etwa bei unplausiblen Werten in der Rohauflösung.
     param: str
     t: float
     value: float | None = None

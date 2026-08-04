@@ -14,12 +14,15 @@ PATIENTS_PARQUET = CACHE_DIR / "patients.parquet"
 PHYSIO_PARQUET = CACHE_DIR / "physio.parquet"
 LAB_PARQUET = CACHE_DIR / "labs.parquet"
 
+# utf-8-sig entfernt die BOM, die Excel beim Export voranstellt
 CSV_ENCODING = "utf-8-sig"
 
 VITAL_PARAMS = ["HF", "SPO2", "BPSystolic", "BPDiastolic", "BPMean", "ICP", "RR", "T"]
 
+# CPP wird zur Laufzeit aus MAP und ICP berechnet
 DERIVED_PARAMS = ["CPP"]
 
+# Werte ausserhalb dieser Grenzen werden verworfen.
 PLAUSIBILITY = {
     "HF": (10.0, 250.0),
     "SPO2": (40.0, 100.0),
@@ -31,6 +34,7 @@ PLAUSIBILITY = {
     "T": (28.0, 43.0),
 }
 
+# Klinische Alarmgrenzen fuer die farbliche Hervorhebung
 THRESHOLDS = {
     "ICP": {"high": 22.0},
     "SPO2": {"low": 90.0},

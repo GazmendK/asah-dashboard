@@ -32,6 +32,7 @@ class _Store:
         self._source: str | None = None
 
     def _set(self, patients, physio, labs, source) -> None:
+        # Index auf case_id sortiert
         self._patients = patients.reset_index(drop=True)
         self._physio = physio.set_index("case_id").sort_index()
         self._labs = labs.set_index("case_id").sort_index()
@@ -47,6 +48,7 @@ class _Store:
         )
 
     def load_frames(self, frames: dict) -> None:
+        # Upload-Weg: ersetzt den Bestand nur im Arbeitsspeicher
         self._set(frames["patients"], frames["physio"], frames["labs"], "upload")
 
     def _ensure(self) -> None:
@@ -161,9 +163,11 @@ def outcome(case_id: int) -> dict:
 
 
 def _aggregate(sub: pd.DataFrame, resolution: str) -> pd.DataFrame:
+    # Nur gueltige Werte gehen in den Mittelwert ein.
     valid = sub[sub["valid"]].copy()
     if valid.empty:
         return valid.assign(t=[], value=[])
+    # t ist in Tagen, ein Stundenintervall entspricht also 1/24
     bin_size = 1.0 / 24.0 if resolution == "hour" else 1.0
     valid["bin"] = np.floor(valid["t"] / bin_size) * bin_size
     agg = (valid.groupby(["param", "bin"], observed=True)["value"]
@@ -195,12 +199,14 @@ def timeseries(case_id: int, params: list[str], resolution: str) -> list[dict]:
 
 
 def _derive_cpp(sub: pd.DataFrame, resolution: str) -> list[dict]:
+    # CPP = MAP - ICP, gebildet aus den bereits aggregierten Werten
     agg = _aggregate(sub[sub["param"].isin(["BPMean", "ICP"])], resolution)
     if agg.empty:
         return []
     wide = agg.pivot(index="t", columns="param", values="value")
     if "BPMean" not in wide or "ICP" not in wide:
         return []
+    # dropna: CPP entsteht nur, wo im selben Intervall beide Werte vorliegen
     cpp = (wide["BPMean"] - wide["ICP"]).dropna()
     return [{"param": "CPP", "t": round(float(t), 5), "value": round(float(v), 3)}
             for t, v in cpp.items()]

@@ -8,6 +8,7 @@ import { THRESHOLDS } from '../constants'
 import { useLanguage } from '../i18n'
 import { ChartCard } from './ChartCard'
 
+
 function insertGapsMulti(points: TimeseriesPoint[]): TimeseriesPoint[] {
   const byParam = new Map<string, TimeseriesPoint[]>()
   for (const p of points) {
@@ -88,6 +89,7 @@ function buildSpec(
             scale: { domain: { param: 'brush' } },
           },
         },
+        // MAP und ICP werden ueber je einen gefilterten Layer gezeichnet. Erst dadurch bekommt jede Groesse eine eigene y-Achse
         layer: [
           {
             transform: [{ filter: "datum.param === 'BPMean'" }],
@@ -109,6 +111,7 @@ function buildSpec(
             layer: icpLayer,
           },
         ],
+        // Getrennte y-Skalen Die x-Achse bleibt geteilt.
         resolve: { scale: { y: 'independent' } },
       },
     ],
