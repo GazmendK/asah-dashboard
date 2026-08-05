@@ -39,6 +39,7 @@ THRESHOLDS = {
     "ICP": {"high": 22.0},
     "SPO2": {"low": 90.0},
     "CPP": {"low": 60.0},
+    "T": {"high": 38.3},
 }
 
 DEFAULT_LABS = ["Na+", "K+", "Ca++", "Glu", "Lac", "pH", "CRP", "tHb", "pO2", "pCO2"]

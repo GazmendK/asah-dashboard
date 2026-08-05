@@ -45,4 +45,5 @@ export const THRESHOLDS: Record<string, { high?: number; low?: number }> = {
   ICP: { high: 22 },
   SPO2: { low: 90 },
   CPP: { low: 60 },
+  T: { high: 38.3 },
 }
