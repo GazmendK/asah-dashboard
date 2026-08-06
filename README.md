@@ -1,7 +1,7 @@
-# aSAB Dashboard
+# aSAH Dashboard
 
 An interactive, web-based dashboard for the analysis and visualization of clinical
-course data of patients with **aneurysmal subarachnoid hemorrhage (aSAB)**. It
+course data of patients with **aneurysmal subarachnoid hemorrhage (aSAH)**. It
 presents the intensive-care course of a single patient across the whole stay:
 physiological time series, derived measures such as the cerebral perfusion
 pressure (CPP), laboratory values, admission scores, complications and outcome,
